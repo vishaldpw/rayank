@@ -1,0 +1,166 @@
+---
+- name: Fetch Incident and Update Incident fields data from ServiceNow
+  hosts: localhost
+  gather_facts: no
+  vars:
+    #file_path: "inputValidationUsecasePayload1.txt"
+    ticketType: "e2e"
+    incident_data_validator: "{{ incident_data_validator }}"
+    ci_name: "51.20.54.6"  # harcoding ci_name , change it later 
+
+    
+
+  tasks:
+
+    - name: Display the incident data received from poller
+      debug:
+        var:  incident_data_validator
+        
+
+
+
+    - name: Extract Incident-number using json_query
+      set_fact:        
+        incident_number: "{{ incident_data_validator['Incident-number'] }}"
+    
+    - name: Display the Incident-number
+      debug:
+        var: incident_number
+
+    - name: Extract description using json_query
+      set_fact:        
+        description: "{{ incident_data_validator['description'] }}"
+        short_description: "{{ incident_data_validator['short_description'] }}"       
+
+
+
+    # - name: Extract Impacted CI 
+    #   set_fact:
+    #    impacted_ci_List: "{{ incident_data_validator.incident | json_query('impactedCi') }}"
+      
+
+    # - name: Display the impacted ci 
+    #   debug:
+    #     var: impacted_ci_List
+
+
+    - name: Get The cmdb details 
+      include_tasks: mysql_query_playbook-Harsh.yml
+      #loop: "{{ impacted_ci_List }}"
+      #loop_control:
+        #loop_var: impacted_ci
+      vars:  
+        query: "SELECT ci_name , credId FROM incidentdata.ci_details ci INNER JOIN incidentdata.`credId-details` cr ON ci.os = cr.os and ci.dns_domain = cr.`prod-EU-Domain` and ci.credType = cr.credType  where ci_name = '{{ ci_name }}';"
+      register: query_result
+      
+    - name: Display the query_result
+      debug:
+        var: query_result
+
+
+    - name: Extract CredId and ci-name values from query_output
+      set_fact:
+        credId: "{{ query_result.query_result[0] | map(attribute='credId') | first | string }}"
+        ciName: "{{ query_result.query_result[0] | map(attribute='ci_name') | first | string }}" 
+
+    - name: Display the credId
+      debug:
+        var: credId
+      
+
+    - name: Get the tickettypes
+      include_tasks: mysql_query_playbook-Harsh.yml
+      vars:  
+        query: "select alertType from template_details where ticketType='{{ ticketType }}' ;"
+      register: query_result
+
+    - name: Extract alertType values from query_result
+      set_fact:
+        alert_types: "{{ query_result.query_result[0] | map(attribute='alertType') | list }}"
+
+    - name: Display all the alert Types
+      debug:
+         var: alert_types
+
+    #- name: Display the file data
+      #debug:
+        #var: alert_result.query_result[0][0].alertType
+
+    - name: Loop through alert types and check for a match in JSON data
+      set_fact:
+       alert_type_matched: "{{ alert_type_matched | default([]) + [item] }}"
+      loop: "{{ alert_types }}"
+      loop_control:
+       loop_var: item
+      when: "item in incident_data_validator.short_description or item in incident_data_validator.description"  # adding or instead of and
+     
+   
+    - name: Display the alertOutput
+      debug:
+        var: alert_type_matched
+
+    - name: Loop through the alert_type_matched
+      include_tasks: mysql_query_playbook-Harsh.yml
+      vars:  
+        query: "select tempId from template_details where alertType = '{{ alert_type_matched[0] }}' ;"
+      register: query_result
+
+    - name: Extract tempId values from query_result
+      set_fact:
+        tempId: "{{ query_result.query_result[0] | map(attribute='tempId') }}"
+
+    - name: Display tempId
+      debug:
+        var: tempId
+
+    # - name: Extract tempId without list brackets
+    #   set_fact:
+    #     tempIdFilter: "{{ tempId | replace('[', '') | replace(']', '') }}"
+
+    - name: Extract tempId without list
+      set_fact:
+        tempIdFilter: "{{ tempId | first |string }}"
+    
+
+
+
+    - name: Display tempId filter
+      debug:
+        var: tempIdFilter
+
+
+## calling end template by passing credId , tempId, ci-name , description , short-description
+
+    - name: Launch AAP Job Template
+      awx.awx.job_launch:
+        tower_host: 35.154.24.128
+        tower_username: rayank
+        tower_password: rayank
+        validate_certs: False  # Set to True if you want to validate SSL certificates
+        job_template: "{{ tempIdFilter }}"
+        credentials:
+          - "{{ credId }}"
+        extra_vars:
+          HOSTS: "{{ ciName }}"
+          DESCRIPTION: "{{ description }}"
+      register: job_launch_result
+    
+    
+    - name: Wait for Job Completion
+      awx.awx.job_wait:
+        tower_host: 35.154.24.128
+        tower_username: rayank
+        tower_password: rayank
+        validate_certs: False  # Set to True if you want to validate SSL certificates
+        job_id: "{{ job_launch_result.id }}"
+      register: job_wait_result
+    
+    
+    - name: Display Job Details
+      debug:
+        var: job_wait_result
+
+          
+   
+        
+    

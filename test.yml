@@ -1,0 +1,29 @@
+---
+
+- name: List Details of Files and Directories
+
+  hosts: all
+
+  become: yes  # This is used to run tasks with elevated privileges
+
+ 
+
+  tasks:
+
+    - name: List details of files and directories
+
+      find:
+
+        paths: /home/ubuntu
+
+        recurse: yes
+
+      register: file_details
+
+ 
+
+    - name: Display file details
+
+      debug:
+
+        var: file_details.files

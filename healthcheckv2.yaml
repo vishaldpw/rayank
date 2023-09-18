@@ -1,0 +1,35 @@
+---
+# YAML documents begin with the document separator ---
+
+# The minus in YAML this indicates a list item.  The playbook contains a list
+# of plays, with each play being a dictionary
+-
+
+  # Hosts: where our play will run and options it will run with
+  name: Check host health
+  become: true
+  gather_facts: true
+  hosts: webservers
+  #gather_facts: false
+  strategy: free
+
+  # Tasks: the list of tasks that will be executed within the play, this section
+  # can also be used for pre and post tasks
+  tasks:
+
+    - name: Check CPU usage
+      shell: "top -bn1 | grep 'Cpu(s)' | sed 's/.*, *\\([0-9.]*\\)%* id.*/\\1/'"
+      register: cpu_usage
+
+    - name: Check memory usage
+      shell: "free -m | awk 'NR==2{printf \"%.2f%%\", $3*100/$2 }'"
+      register: mem_usage 
+
+    - name: Check disk usage
+      shell: "df -h / | awk 'NR==2{print $5}'"
+      register: disk_usage
+
+    - name: Display health check results
+      debug:
+        msg: "CPU usage: {{ cpu_usage.stdout }}% | Memory usage: {{ mem_usage.stdout }} | Disk usage: {{ disk_usage.stdout }}"
+

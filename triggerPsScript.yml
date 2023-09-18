@@ -1,0 +1,8 @@
+---
+- name: Execute PowerShell Script
+  hosts: "{{ host }"
+  gather_facts: no  # Disable fact gathering for Windows hosts
+
+  tasks:
+    - name: Execute the PowerShell script
+      win_command: powershell.exe -ExecutionPolicy Bypass -File "C:\PrePostChecks-without-BIB\MasterBots\Masterbot-WindowsHealthChecks.ps1"

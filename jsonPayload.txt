@@ -1,0 +1,48 @@
+{
+        "incidents": [{
+                        "Incident-number": "INC001",
+                        "CI-Name": "50.19.161.188",
+                        "impact": "1",
+                        "urgency": "1",
+                        "assignment_group": "IT Service Desk",
+                        "short_description": "Service Outage Alert",
+                        "description": "The CPU is currently experiencing an outage and is unavailable to users.",
+                        "category": "CPU Alert",
+                        "subcategory": "CPU Alert"
+                },
+                {
+                        "Incident-number": "INC002",
+                        "CI-Name": "50.19.161.188",
+                        "impact": "1",
+                        "urgency": "1",
+                        "assignment_group": "IT Service Desk",
+                        "short_description": "Service Outage Alert",
+                        "description": "The 'Memory' is currently experiencing an outage and is unavailable to users.",
+                        "category": "Memory alert",
+                        "subcategory": "Memory alert"
+                },
+                {
+                        "Incident-number": "INC003",
+                        "CI-Name": "3.84.176.121",
+                        "impact": "1",
+                        "urgency": "1",
+                        "assignment_group": "IT Service Desk",
+                        "short_description": "Service Outage Alert",
+                        "description": "The 'Service' is currently experiencing an outage and is unavailable to users.",
+                        "category": "Service alert",
+                        "subcategory": "Service alert"
+                },
+                {
+                        "Incident-number": "INC004",
+                        "CI-Name": "Server-D",
+                        "impact": "1",
+                        "urgency": "1",
+                        "assignment_group": "IT Service Desk",
+                        "short_description": "Service Outage Alert",
+                        "description": "The 'Disk' is currently experiencing an outage and is unavailable to users.",
+                        "category": "Disk alert",
+                        "subcategory": "Disk alert"
+
+                }
+        ]
+}

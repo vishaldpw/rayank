@@ -1,0 +1,111 @@
+---
+- name: Read incident data from a file and REST-API call a template
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    file_path: "{{ file_path }}"
+    alert_name: "{{ alert_name }}"
+    CI_Name: "{{ CI_Name }}"
+    OS: "{{ OS }}"
+    Restricted: "{{ Restricted }}"
+
+  tasks:
+
+    - block:
+
+      - name: Read data from file
+        slurp:
+          #src: /home/ubuntu/.ansible/cmdb_data
+          src: "{{ file_path }}"
+        register: file_content
+
+      - name: Convert file content to JSON
+        set_fact:
+          json_data: "{{ file_content.content | b64decode | from_json }}"
+
+      - name: Display the JSON Data
+        debug:
+          var: json_data
+
+      - name: Check the type of JSON Data
+        debug:
+          msg: "the data type of json_data is {{ json_data | type_debug }}"
+
+      - name: Loop through the incidents and find matching ones
+        set_fact:
+          matching_set: "{{ item }}"
+        loop: "{{ json_data.incidents }}"
+        when:
+          - item['CI-Name'] == CI_Name
+          - item['Os'] == OS
+          - item['Restrict'] == Restricted
+
+      - name: Check if matching incidents were found
+        fail:
+           msg: "No matching incidents found."
+        when: matching_set is not defined
+
+      - name: Print matching set
+        debug:
+          var: matching_set
+
+      - name: Get CI-Name and Template-Id from matching_set
+        set_fact:
+          CI_Name: "{{ matching_set['CI-Name'] }}"
+          Template_Id: "{{ matching_set['Template-Id'] }}"
+        when: matching_set is defined and matching_set | length > 0
+
+      - name: Display CI-Name and Template-Id
+        debug:
+          msg: "CI-Name: {{ CI_Name }}, Template-Id: {{ Template_Id }}"
+
+      - name: Launch the Job Template
+        vars:
+          pat_token: "6hXjvaq8TzsHdK2U5ppkgfgJs4YUPc"
+        uri:
+          url: "https://35.154.24.128/api/v2/job_templates/{{ Template_Id }}/launch/"
+          method: POST
+          headers:
+            Authorization: "Bearer {{ pat_token }}"
+            Accept: "application/json"
+            Content-Type: "application/json"
+          body_format: json
+          body:
+            extra_vars:
+              host: "{{ CI_Name }}"
+          validate_certs: no
+        register: response
+        failed_when: false
+        changed_when: false
+
+      - name: Display API response
+        debug:
+          var: response
+
+      - name: Handle success and failure conditions
+        set_fact:
+          job_id: "{{ response.json.id }}"
+          job_status: "{{ response.json.status }}"
+          api_response_status: "{{ response.status }}"
+        when: response.status in [200, 201]
+
+      - name: Display extracted values
+        debug:
+          msg: "API Response Status: {{ api_response_status }}, Job ID: {{ job_id }}, Job Status: {{ job_status }}"
+        when: job_id is defined and job_status is defined
+
+      - name: DEBUG
+        debug:
+          var: response
+      - name: Log Output For Result
+        debug:
+          msg:
+            - "Log : SUCCESSFUL"
+
+ 
+      rescue: 
+        - name: Log Output For Failure
+          debug:
+            msg: "Log : FAILED : Task {{ ansible_failed_task.name }} Failed and the ERROR: {{ ansible_failed_result }}"
+          failed_when: True

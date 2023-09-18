@@ -1,0 +1,12 @@
+---
+- name: Test Jinja2 Templating
+  hosts: 54.90.160.187
+  
+  tasks:
+  - userData: name=Gaurav age=18
+    register: userResult
+
+  - name: print result
+    debug:
+      var: userResult
+     

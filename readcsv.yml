@@ -1,0 +1,14 @@
+---
+- name: Reading csv information
+  hosts: localhost
+  gather_facts: yes
+
+  tasks:
+    - name: Read csv
+      read_csv:
+        path: samplecsv.csv
+      register: usecase
+
+    - name: Print usecase name and value
+      debug:
+        msg: "{{ usecase }}"

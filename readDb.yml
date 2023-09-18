@@ -1,0 +1,33 @@
+- name: hitting Data from MySQL
+  hosts: localhost
+
+  vars:
+    #host: "db.vishal-chauhan.in"
+    host: "194.195.112.205"
+  tasks:
+    # - name: Install mysqlclient
+    #   pip:
+    #     name: mysqlclient
+    #     state: present
+
+    # - name: Install PyMySQL
+    #   pip:
+    #     name: pymysql
+    #     state: present
+
+    - name: Execute MySQL Query
+      community.mysql.mysql_query:
+        login_host: "{{ host }}"
+        #login_user: "linroot"
+        login_user: "root"
+        login_port: "30517"
+        #login_password: "&rU1HRBh4W9UHkDb"
+        login_password: "IRONMAN"
+        #login_db: Ansible
+        login_db: cat
+        query: "SELECT * FROM `cat-table`;"
+      register: query_result
+
+    - name: Debug Query Result
+      debug:
+        var: query_result

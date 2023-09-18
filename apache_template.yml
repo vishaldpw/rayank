@@ -1,0 +1,27 @@
+---
+# YAML documents begin with the document separator ---
+
+# The minus in YAML this indicates a list item.  The playbook contains a list
+# of plays, with each play being a dictionary
+- name: Apache Webservers Demo
+  hosts: all
+  #remote_user: root
+  become: yes
+  gather_facts: false
+  
+  vars:
+    - Name: Rayank
+
+  tasks:
+
+    - name: Print A Name
+      debug:
+         msg: "Name is {{ Name }}"
+
+
+
+    - name: Install cmatrix Service
+      apt:
+        name: cmatrix
+        state: present
+ 

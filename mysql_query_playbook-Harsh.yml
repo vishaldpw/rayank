@@ -1,0 +1,17 @@
+- name: Execute MySQL Query
+  mysql_query:
+    login_host: "{{ var_db_hostname }}"
+    login_user: "{{ var_db_username }}"
+    login_password: "{{ var_db_password }}"
+    login_db: "incidentdata"
+    login_port: "{{ var_db_port }}"
+    query: "{{ query }}"
+  register: query_result
+  
+- name: Print Query 
+  debug:
+    var: query
+
+- name: Print Query Result
+  debug:
+    var: query_result

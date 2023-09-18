@@ -1,0 +1,13 @@
+---
+- name: Get Current Date and Time
+  hosts: localhost  # You can adjust the target host or use 'localhost' for the local machine
+  gather_facts: no  # We don't need to gather facts for this example
+
+  tasks:
+    - name: Execute 'date' command
+      ansible.builtin.command: date
+      register: current_datetime
+
+    - name: Display Current Date and Time
+      debug:
+        var: current_datetime.stdout

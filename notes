@@ -1,0 +1,14 @@
+we can set the inventory file from static to dynamic using a script that returns us alist of end servers 
+for example to run a playbook to a particular set of inventory that is set in a static file we use:-
+ansible -playbook -i inventory.txt healthcheck.yml 
+
+but suppose if your inventory changes everyday and on each day you I new set on server in inventory then we can use a python script to return us a fresh list of inventory 
+and we can run the playbook 
+
+ansible-playbook -i pythonScript.py healthcheck.yml
+
+
+
+### Creating custom modules ##
+suppose if you want to create your own custom modules :-
+https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html#creating-a-module

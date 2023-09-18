@@ -1,0 +1,17 @@
+---
+- name: Install a package
+  hosts: ansible
+  become: true
+  vars:
+    - Name: Rayank
+
+  tasks:
+
+    - name: Print A Name
+      debug:
+         msg: "Name is {{ Name }}"
+
+    - name: Install apache Service
+      apt:
+        name: cmatrix
+        state: present

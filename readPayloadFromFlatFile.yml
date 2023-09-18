@@ -1,0 +1,42 @@
+---
+- name: Read a text file
+  hosts: localhost
+  remote_user: root
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Read a file
+      slurp:
+        src: jsonPayload.txt
+      register: output
+
+    - name: Parse JSON
+      set_fact:
+        incidents: "{{ output.content | b64decode | from_json }}"
+
+    - name: print each paylaod
+      debug:
+        var: output
+
+
+    - name: Process Incidents
+      debug:  # Replace this with your desired task for processing each incident
+        msg: |
+          Incident Number: {{ item["Incident-number"] }}
+          CI Name: {{ item["CI-Name"] }}
+          Impact: {{ item["impact"] }}
+          Urgency: {{ item["urgency"] }}
+          Assignment Group: {{ item["assignment_group"] }}
+          Short Description: {{ item["short_description"] }}
+          Description: {{ item["description"] }}
+          Category: {{ item["category"] }}
+          Subcategory: {{ item["subcategory"] }}
+      loop: "{{ incidents.incidents }}"
+
+
+    - name: call validator template in loop
+      include_tasks: triggering-template-onlyTasks.yml           
+      loop: "{{ incidents.incidents }}"
+      loop_control:
+        loop_var: item  # This defines the loop variable 'item'

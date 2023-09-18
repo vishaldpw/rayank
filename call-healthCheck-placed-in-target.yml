@@ -1,0 +1,42 @@
+---
+- name: Execute PowerShell Script
+  hosts: "{{ host }}"
+  become: no
+  gather_facts: yes  # Disable fact gathering for Windows hosts
+
+  tasks:
+    - name: Execute the PowerShell script
+      win_command: powershell.exe -File "C:\PrePostChecks-without-BIB\MasterBots\Masterbot-WindowsHealthChecks.ps1"
+      register: output
+
+    - name: print the output
+      debug:
+        var: output.stdout
+
+    - name: Parse HTML file path
+      set_fact:
+        html_file_path: "{{ output.stdout | regex_search('html path is (.+)', '\\1') }}"
+      vars:
+        output: "{{ output.stdout }}"
+  
+    - name: Print HTML file path
+      debug:
+        var: html_file_path
+
+    # - name: Copy the HTML report back to the Ansible control machine
+    #   win_get_url:
+    #     url: "{{ html_file_path }}"
+    #     dest: "/home/ec2-user/reports"
+    #  delegate_to: localhost
+
+  # - name:  Store file into /tmp/fetched/host.example.com/tmp/somefile
+  #   fetch:
+  #     src: "{{ html_file_path }}"
+  #     dest: "/home/ec2-user/reports"
+
+  # - name: Fetch the file from the remote machine
+  #   fetch:
+  #     src: "C:\\PrePostChecks-without-BIB\\Logfiles\\07-09-2023\\Windows Healthcheck Report.log"
+  #     dest: '/home/ec2-user/reports'  # Replace with the local path to store the file
+  #     flat: yes  # If you want to copy the file without creating a directory structure
+  #   delegate_to: localhost

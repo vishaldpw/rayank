@@ -1,0 +1,28 @@
+- name: Launch AAP Job Template
+  awx.awx.job_launch:
+    tower_host: 35.154.24.128
+    tower_username: rayank
+    tower_password: rayank
+    validate_certs: False  # Set to True if you want to validate SSL certificates
+    job_template: rinki-task1_triggerJob
+    extra_vars:
+      Template_Id: "{{ Template_Id }}"
+      credential_ID: "{{ credential_ID }}"
+      CI_Name: "{{ CI_Name }}"
+      DESCRIPTION: "{{ DESCRIPTION }}"
+  register: job_launch_result
+
+
+- name: Wait for Job Completion
+  awx.awx.job_wait:
+    tower_host: 35.154.24.128
+    tower_username: rayank
+    tower_password: rayank
+    validate_certs: False  # Set to True if you want to validate SSL certificates
+    job_id: "{{ job_launch_result.id }}"
+  register: job_wait_result
+
+
+- name: Display Job Details
+  debug:
+    var: job_wait_result

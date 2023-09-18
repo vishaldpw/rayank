@@ -1,0 +1,9 @@
+- name: Example playbook for Windows
+  hosts: "{{ host }}"
+  gather_facts: no
+
+  tasks:
+    - name: Run some task on Windows
+      win_service:
+        name: spooler
+        state: started

@@ -1,0 +1,58 @@
+--- #playbook to insattl YUM package in target host
+- name: Install apt using task 
+  hosts: localhost
+  #remote_user: root
+  become: yes
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: print msg
+      debug:
+        msg: "Hello world"
+        
+    #- name: get user id
+      #debug:
+        #msg: "{{ ansible_user_id }}"
+
+    - name: print pwd
+      command: pwd
+      register: pwdResult
+
+    - name: print pwd result
+      debug:
+        var: pwdResult
+
+    - name: Take out of load balancer pool
+      local_action: command python /var/lib/awx/projects/rinki/test.py
+
+    - name: Execute script on control machine
+      command: /var/lib/awx/projects/rinki/test.py
+      register: script_output
+      delegate_to: localhost
+
+    - name: Print script output
+      debug:
+        var: script_output.stdout
+        
+    - name: Run a script with arguments (using 'cmd' parameter)
+      ansible.builtin.script:
+        cmd: /var/lib/awx/projects/rinki/test.py
+
+ 
+
+    - name: Execute Python script through shell module
+      shell: python3 /var/lib/awx/projects/rinki/test.py
+      delegate_to: 35.154.24.128
+      
+
+    - name: python script
+      command: python3 /var/lib/awx/projects/rinki/test.py
+      register: result
+
+    - name: print result
+      debug:
+        var: result 
+
+        
+

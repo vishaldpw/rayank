@@ -1,0 +1,13 @@
+---
+- name: Install apache2 
+  hosts: "{{ host }}"
+  remote_user: ubuntu
+  become: yes
+  gather_facts: yes 
+
+
+  tasks:
+    - name: Install Apache service 
+      apt:
+        name: apache2
+        state: present 

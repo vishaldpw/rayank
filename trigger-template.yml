@@ -1,0 +1,14 @@
+---
+- name: Launch Ansible Job
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+    - name: Launch AAP Job Template
+      awx.awx.job_launch:
+        tower_host: 35.154.24.128
+        tower_username: rayank
+        tower_password: rayank
+        validate_certs: False  # Set to True if you want to validate SSL certificates
+        job_template: rayank-readCSV
+

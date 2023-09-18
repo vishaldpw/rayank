@@ -1,0 +1,25 @@
+    - name: Initialize a list to store alert type
+      set_fact:
+        alert_types: []
+
+ 
+
+    - name: Execute MySQL Query
+      community.mysql.mysql_query:
+        login_host: "{{ var_db_hostname }}"
+        login_user: "{{ var_db_username }}"
+        login_port: "{{ var_db_port }}"
+        login_password: "{{ var_db_password }}"
+        login_db: incidentdata
+        query: "{{ query }}"
+       
+      register: query_result
+    - name: Extract query_result using json_query
+      set_fact:
+        alert_names: "{{ query_result.query_result[0] | map(attribute='alert_name') | list }}"
+
+ 
+
+    - name: Display alert_names
+      debug:
+        var: alert_names

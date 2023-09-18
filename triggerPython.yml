@@ -1,0 +1,13 @@
+---
+- name: extra variable demo
+  hosts: 35.154.24.128
+  tasks:  
+    - name: read python file
+      #slurp:
+      #  src: ci_name.py
+      command: "python3 /home/ec2-user/test.py"
+      register: python_file_content
+  
+    - name: Display Python file content
+      debug:
+        var: python_file_content

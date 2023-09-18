@@ -1,0 +1,38 @@
+---
+- name: Token generation
+  hosts: localhost
+  gather_facts: yes 
+  
+  tasks:
+    - name: print username
+      set_fact:
+        instance_url: "{{ var_url }}"
+        password: "{{ var_pass }}"
+        username: "{{ var_user }}"
+        client_id: "{{ var_client_id }}"
+        client_secret: "{{ var_client_secret  }}"
+
+    - name: Define token endpoint URL
+      set_fact:
+        token_endpoint: "{{ instance_url }}/oauth_token.do"
+
+    - name: Create data dictionary
+      set_fact:
+        data:
+          grant_type: password
+          client_id: "{{ client_id }}"
+          client_secret: "{{ client_secret }}"
+          username: "{{ username }}"
+          password: "{{ password }}"
+
+    - name: Get ServiceNow Token
+      uri:
+        url: "{{ token_endpoint }}"
+        method: POST
+        body_format: form-urlencoded
+        body: "{{ data }}"
+      register: response
+
+    - name: Print response
+      debug:
+        var: response.json.access_token
